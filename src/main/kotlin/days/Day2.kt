@@ -21,21 +21,19 @@ class Day2 : Day(2) {
             private val looseFromId: Char
         ) {
             fun calcPoint(opponentMove: Char): Int {
-                return if (opponentMove == id) {
-                    point + drawGamePoint
-                } else if (opponentMove == winsFromId) {
-                    point + winGamePoint
-                } else {
-                    point + loseGamePoint
+                return when (opponentMove) {
+                    id -> point + drawGamePoint
+                    winsFromId -> point + winGamePoint
+                    else -> point + loseGamePoint
                 }
             }
 
             fun winsFrom(): GameElement {
-                return gameElements.get(winsFromId)!!
+                return gameElements[winsFromId]!!
             }
 
             fun looseFrom(): GameElement {
-                return gameElements.get(looseFromId)!!
+                return gameElements[looseFromId]!!
             }
         }
     }
@@ -51,13 +49,12 @@ class Day2 : Day(2) {
     }
 
     override fun partOne(): Any {
-        val elementConversion = mapOf(
-            Pair('X', 'A'),
-            Pair('Y', 'B'),
-            Pair('Z', 'C'),
-        )
         return inputList.map { GameMove(it) }.map {
-            GameRules.gameElements.get(elementConversion[it.yourMove()]!!)!!.calcPoint(it.opponentMove())
+            when (it.yourMove()) {
+                'X' -> GameRules.gameElements['A']!!.calcPoint(it.opponentMove())
+                'Y' -> GameRules.gameElements['B']!!.calcPoint(it.opponentMove())
+                else -> GameRules.gameElements['C']!!.calcPoint(it.opponentMove())
+            }
         }.sum()
     }
 
@@ -69,12 +66,10 @@ class Day2 : Day(2) {
          *       and Z means you need to win
          */
         return inputList.map { GameMove(it) }.map {
-            if (it.yourMove() == 'X') {
-                GameRules.gameElements.get(it.opponentMove())!!.winsFrom().calcPoint(it.opponentMove())
-            } else if (it.yourMove() == 'Y') {
-                GameRules.gameElements.get(it.opponentMove())!!.calcPoint(it.opponentMove())
-            } else {
-                GameRules.gameElements.get(it.opponentMove())!!.looseFrom().calcPoint(it.opponentMove())
+            when (it.yourMove()) {
+                'X' -> GameRules.gameElements[it.opponentMove()]!!.winsFrom().calcPoint(it.opponentMove())
+                'Y' -> GameRules.gameElements[it.opponentMove()]!!.calcPoint(it.opponentMove())
+                else -> GameRules.gameElements[it.opponentMove()]!!.looseFrom().calcPoint(it.opponentMove())
             }
         }.sum()
     }
