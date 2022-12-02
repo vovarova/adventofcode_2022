@@ -3,6 +3,10 @@ package days
 class Day2 : Day(2) {
 
     object GameRules {
+        const val winGamePoint = 6
+        const val loseGamePoint = 0
+        const val drawGamePoint = 3
+
         val gameElements = listOf(
             GameElement(name = "Rock", id = 'A', point = 1, winsFromId = 'C', looseFromId = 'B'),
             GameElement(name = "Paper", id = 'B', point = 2, winsFromId = 'A', looseFromId = 'C'),
@@ -18,11 +22,11 @@ class Day2 : Day(2) {
         ) {
             fun calcPoint(opponentMove: Char): Int {
                 return if (opponentMove == id) {
-                    point + 3
+                    point + drawGamePoint
                 } else if (opponentMove == winsFromId) {
-                    point + 6
+                    point + winGamePoint
                 } else {
-                    point
+                    point + loseGamePoint
                 }
             }
 
