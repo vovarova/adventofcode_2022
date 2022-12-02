@@ -1,27 +1,49 @@
 package days
 
 class Day2 : Day(2) {
-    val gameRules = mapOf(
-        Pair('A', Pair('C', 'B')),
-        Pair('B', Pair('A', 'C')),
-        Pair('C', Pair('B', 'A')),
-    )
 
-    val elementPoints = mapOf(
-        Pair('A', 1),
-        Pair('B', 2),
-        Pair('C', 3),
-    )
+    object GameRules {
+        val gameElements = listOf(
+            GameElement(name = "Rock", id = 'A', point = 1, winsFromId = 'C', looseFromId = 'B'),
+            GameElement(name = "Paper", id = 'B', point = 2, winsFromId = 'A', looseFromId = 'C'),
+            GameElement(name = "Scissors", id = 'C', point = 3, winsFromId = 'B', looseFromId = 'A')
+        ).map { it.id to it }.toMap()
 
-    fun calcPoints(opponentMove: Char, yourMove: Char): Int {
-        var points = 0
-        points += elementPoints[yourMove]!!
-        if (opponentMove == yourMove) {
-            points += 3
-        } else if (opponentMove == gameRules[yourMove]!!.first) {
-            points += 6
+        class GameElement(
+            val name: String,
+            val id: Char,
+            val point: Int,
+            private val winsFromId: Char,
+            private val looseFromId: Char
+        ) {
+            fun calcPoint(opponentMove: Char): Int {
+                return if (opponentMove == id) {
+                    point + 3
+                } else if (opponentMove == winsFromId) {
+                    point + 6
+                } else {
+                    point
+                }
+            }
+
+            fun winsFrom(): GameElement {
+                return gameElements.get(winsFromId)!!
+            }
+
+            fun looseFrom(): GameElement {
+                return gameElements.get(looseFromId)!!
+            }
         }
-        return points
+    }
+
+    class GameMove(val line: String) {
+        fun yourMove(): Char {
+            return line[2]
+        }
+
+        fun opponentMove(): Char {
+            return line[0]
+        }
     }
 
     override fun partOne(): Any {
@@ -30,21 +52,26 @@ class Day2 : Day(2) {
             Pair('Y', 'B'),
             Pair('Z', 'C'),
         )
-        return inputList.map {
-            calcPoints(it[0], elementConversion[it[2]]!!)
+        return inputList.map { GameMove(it) }.map {
+            GameRules.gameElements.get(elementConversion[it.yourMove()]!!)!!.calcPoint(it.opponentMove())
         }.sum()
     }
 
     override fun partTwo(): Any {
-        return inputList.map {
-            val yourMove = if (it[2] == 'X') {
-                gameRules[it[0]]!!.first
-            } else if (it[2] == 'Y') {
-                it[0]
+
+        /**
+         *         X means you need to lose
+         *         Y means you need to end the round in a draw
+         *       and Z means you need to win
+         */
+        return inputList.map { GameMove(it) }.map {
+            if (it.yourMove() == 'X') {
+                GameRules.gameElements.get(it.opponentMove())!!.winsFrom().calcPoint(it.opponentMove())
+            } else if (it.yourMove() == 'Y') {
+                GameRules.gameElements.get(it.opponentMove())!!.calcPoint(it.opponentMove())
             } else {
-                gameRules[it[0]]!!.second
+                GameRules.gameElements.get(it.opponentMove())!!.looseFrom().calcPoint(it.opponentMove())
             }
-            calcPoints(it[0], yourMove)
         }.sum()
     }
 }
