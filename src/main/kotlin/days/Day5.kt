@@ -5,7 +5,7 @@ import java.util.*
 class Day5 : Day(5) {
 
     fun getMoves(inputList: List<String>): List<Move> {
-        return inputList.drop(10)
+        return inputList.drop(inputList.indexOf("") + 1)
             .map {
                 "\\d+".toRegex().findAll(it).map { it.value }.toList().let {
                     Move(it[0].toInt(), it[1].toInt(), it[2].toInt())
@@ -14,8 +14,8 @@ class Day5 : Day(5) {
     }
 
     fun getStacks(inputList: List<String>): List<LinkedList<Char>> {
-        val stacks = IntRange(0, 9).map { LinkedList<Char>() }
-        inputList.take(8)
+        val stacks = IntRange(0, inputList[0].chunked(4).count()).map { LinkedList<Char>() }
+        inputList.take(inputList.indexOf("") - 1)
             .forEach {
                 it.chunked(4).forEachIndexed { index, element ->
                     run {
