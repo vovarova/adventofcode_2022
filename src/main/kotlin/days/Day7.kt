@@ -5,7 +5,7 @@ import java.util.*
 class Day7 : Day(7) {
 
     class FolderStructure(commands: List<String>) {
-        val ROOT = "root"
+        val ROOT = "/"
         val index: MutableMap<String, Folder> = mutableMapOf()
         fun root(): Folder = index[ROOT]!!
         fun folders(): Collection<Folder> = index.values
@@ -14,40 +14,31 @@ class Day7 : Day(7) {
             buildIndex(commands)
         }
 
-        fun buildIndex(commands: List<String>): Map<String, Folder> {
-            val path: LinkedList<String> = LinkedList<String>()
-            path.add(ROOT)
-            var currentFolder = Folder(ROOT)
-            var ls = false
-            commands.drop(1)
+        private fun buildIndex(commands: List<String>): Map<String, Folder> {
+            val path: LinkedList<Folder> = LinkedList<Folder>()
+            commands
                 .forEach {
-                    if (it == "$ ls") {
-                        ls = true
-                    } else
-                        if (it.startsWith("$ cd ..")) {
-                            path.pollLast()
-                            ls = false
-                        } else if (it.startsWith("\$ cd")) {
-                            path.add(it.substring(5))
-                            val folderPath = path.joinToString(separator = "/")
-                            currentFolder = Folder(folderPath)
-                            index[folderPath] = currentFolder
-                            ls = false
-                        } else if (ls && it.startsWith("dir")) {
-                            currentFolder.folders.add(it.substring(4))
-                        } else if (ls) {
-                            it.split(" ").also {
-                                currentFolder.files.add(Pair(it[1], it[0].toInt()))
-                            }
+                    if (it.startsWith("$ cd ..")) {
+                        path.pollLast()
+                    } else if (it.startsWith("\$ cd")) {
+                        val changedFolder = path.peekLast()?.childFolder(it.substring(5)) ?: Folder(ROOT)
+                        path.add(changedFolder)
+                    } else if (it.startsWith("dir")) {
+                        path.peekLast()?.folders?.add(it.substring(4))
+                    } else if (it[0].isDigit()) {
+                        it.split(" ").also {
+                            path.peekLast()?.files?.add(Pair(it[1], it[0].toInt()))
                         }
+                    }
                 }
             return index
         }
 
-        inner class Folder(val name: String) {
+        inner class Folder(val path: String) {
             init {
-                index[name] = this
+                index[path] = this
             }
+
             private var calculated = false
             private var size: Long = 0
             val folders: MutableList<String> = mutableListOf()
@@ -55,13 +46,18 @@ class Day7 : Day(7) {
 
             fun calcSize(): Long {
                 if (!calculated) {
-                    size = files.sumOf { it.second.toLong() } + folders.sumOf { index["$name/$it"]!!.calcSize() }
+                    size = files.sumOf { it.second.toLong() } + folders.sumOf { index["$path$it/"]!!.calcSize() }
                     calculated = true
                 }
                 return size
+            }
 
+            fun childFolder(folderName: String): Folder {
+                return Folder("$path$folderName/")
             }
         }
+
+
     }
 
     override fun partOne(): Any {
