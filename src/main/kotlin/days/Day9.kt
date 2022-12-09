@@ -30,17 +30,17 @@ class Day9 : Day(9) {
             }
         }
 
-        fun intersects(other: KnotPosition): Boolean {
+        fun isSibling(other: KnotPosition): Boolean {
             return (listOf(this) + straightSiblings() + diagonalSiblings()).any { it.equals(other) }
         }
 
         fun follow(other: KnotPosition): KnotPosition {
-            if (!intersects(other)) {
+            if (!isSibling(other)) {
                 if (row == other.row || column == other.column) {
-                    return straightSiblings().first { it.intersects(other) }
+                    return straightSiblings().first { it.isSibling(other) }
                 }
                 //Diagonal intersections
-                return diagonalSiblings().first { it.intersects(other) }
+                return diagonalSiblings().first { it.isSibling(other) }
             }
             return this
         }
