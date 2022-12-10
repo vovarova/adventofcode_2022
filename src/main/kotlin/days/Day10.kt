@@ -2,41 +2,59 @@ package days
 
 class Day10 : Day(10) {
 
-    abstract class Command {
+    val commands = inputList.map {
+        when (it) {
+            "noop" -> Command.Noop
+            else -> Command.AddX(it.split(" ")[1].toInt())
+        }
+    }
+
+    class InstructionExecutor(commandsInput: List<Command>) {
+        private val operations: List<Operation> = commandsInput.flatMap { it.operations }
+
+        /**
+         * valueRegistry[1] means value for end of 1-st cycle,and value for 2-nd cycle.
+         */
+        private val valueRegistry: List<Int>
+
+        init {
+            valueRegistry =
+                IntRange(1, operations.size).fold(mutableListOf(1)) { list, endCycle ->
+                    list.also { list[endCycle] = operations[endCycle - 1].execute(list[endCycle - 1]) }
+                }
+        }
+
+        fun value(cycle: Int): Int {
+            return valueRegistry[cycle - 1]
+        }
+    }
+
+    open class Command(val operations: List<Operation>) {
+        object Noop : Command(listOf(Operation.Wait))
+        class AddX(value: Int) : Command(listOf(Operation.Wait, Operation.Change(value)))
+    }
+
+    abstract class Operation {
         abstract fun execute(value: Int): Int
-    }
-
-    class AddX(val commandValue: Int) : Command() {
-        override fun execute(value: Int): Int {
-            return commandValue + value
-        }
-    }
-
-    object Noop : Command() {
-        override fun execute(value: Int): Int = value
-    }
-
-
-    fun valueRegister(): Array<Int> {
-        val commands = inputList.map {
-            when (it) {
-                "noop" -> listOf(Noop)
-                else -> listOf(Noop, AddX(it.split(" ")[1].toInt()))
+        class Change(private val commandValue: Int) : Operation() {
+            override fun execute(value: Int): Int {
+                return commandValue + value
             }
-        }.flatMap { it }
-        return IntRange(1, commands.size).fold(Array(commands.size + 1) { i -> 1 }) { array, index ->
-            array.also { array[index] = commands[index - 1].execute(array[index - 1]) }
+        }
+
+        object Wait : Operation() {
+            override fun execute(value: Int): Int = value
         }
     }
-
 
     override fun partOne(): Any {
-        return arrayOf(20, 60, 100, 140, 180, 220).map { valueRegister()[it - 1] * it }.sum()
+        val instructionExecutor = InstructionExecutor(commands)
+        return arrayOf(20, 60, 100, 140, 180, 220).map { instructionExecutor.value(it) * it }.sum()
     }
 
 
     override fun partTwo(): Any {
-        val sprite = valueRegister()
+        val sprite = InstructionExecutor(commands)
         val screenCrt = listOf(
             IntRange(1, 40),
             IntRange(41, 80),
@@ -45,11 +63,11 @@ class Day10 : Day(10) {
             IntRange(161, 200),
             IntRange(201, 240)
         ).map {
-            it.mapIndexed { schreenPosition, striteIndex ->
+            it.mapIndexed { screenPosition, striteIndex ->
                 IntRange(
-                    sprite[striteIndex - 1] - 1,
-                    sprite[striteIndex - 1] + 1
-                ).contains(schreenPosition)
+                    sprite.value(striteIndex) - 1,
+                    sprite.value(striteIndex) + 1,
+                ).contains(screenPosition)
             }.map {
                 if (it) {
                     '#'
