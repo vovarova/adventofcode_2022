@@ -39,7 +39,6 @@ class Day9 : Day(9) {
                 if (row == other.row || column == other.column) {
                     return straightSiblings().first { it.isSibling(other) }
                 }
-                //Diagonal intersections
                 return diagonalSiblings().first { it.isSibling(other) }
             }
             return this

@@ -106,7 +106,7 @@ class Day11() : Day(11) {
             }
         }
 
-        class OptimizedNumber(val reminders: Map<Int, NumberReminder>) :
+        class OptimizedNumber(private val reminders: Map<Int, NumberReminder>) :
             Number<OptimizedNumber> {
             override fun times(number: Int): OptimizedNumber =
                 reminders.values.map { it.divisionBase to it * number }.toMap().let { OptimizedNumber(it) }
@@ -217,9 +217,4 @@ class Day11() : Day(11) {
         return optimizeExecutionMonkeys.values.map { it.operations }.sortedDescending().take(2)
             .map { it.toLong() } .reduce { a, b -> a * b }
     }
-}
-
-fun main() {
-    val partTwo = Day11().partTwo()
-    println(partTwo)
 }

@@ -15,12 +15,12 @@ class Day10 : Day(10) {
         /**
          * valueRegistry[1] means value for end of 1-st cycle,and value for 2-nd cycle.
          */
-        private val valueRegistry: List<Int>
+        val valueRegistry: List<Int>
 
         init {
             valueRegistry =
                 IntRange(1, operations.size).fold(mutableListOf(1)) { list, endCycle ->
-                    list.also { list[endCycle] = operations[endCycle - 1].execute(list[endCycle - 1]) }
+                    list.also { list.add(endCycle, operations[endCycle - 1].execute(list[endCycle - 1])) }
                 }
         }
 
