@@ -10,6 +10,7 @@ class Day12() : Day(12) {
         val start: Cell
         val end: Cell
         val acells: List<Cell>
+
         init {
             val rows = input.size
             val columns = input[0].length
@@ -36,8 +37,8 @@ class Day12() : Day(12) {
 
         fun startPath(): Path = Path(listOf(start))
 
-        fun startPathWithAllA(): List<Path>{
-            return (acells+start).map { Path(listOf(it)) }
+        fun startPathWithAllA(): List<Path> {
+            return (acells + start).map { Path(listOf(it)) }
         }
 
 
@@ -48,6 +49,11 @@ class Day12() : Day(12) {
             fun right(): Cell = Cell(row, column + 1)
             fun equalsCell(other: Cell): Boolean {
                 return this.row == other.row && this.column == other.column
+            }
+
+            fun isValidCell(): Boolean {
+                return row >= 0 && row < heightMap.size
+                        && column >= 0 && column < heightMap[row].size
             }
 
             fun toPair(): Pair<Int, Int> = Pair(row, column)
@@ -65,24 +71,18 @@ class Day12() : Day(12) {
 
         inner class Path(val cells: List<Cell>) {
             fun isFinished(): Boolean = cells.last().equalsCell(end)
-            fun containCycles(): Boolean {
-                val size = cells.map { it.toPair() }.distinct().size
-                return cells.size != size
-            }
-            fun head():Cell = cells.last()
+
+            fun head(): Cell = cells.last()
 
             fun addCell(cell: Cell): Path = Path(cells + cell)
 
             fun possiblePath(): List<Path> {
                 val last = cells.last()
                 return listOf(last.up(), last.down(), last.left(), last.right())
-                    .filter {
-                        it.row >= 0 && it.row < heightMap.size
-                                && it.column >= 0 && it.column < heightMap[0].size
-                    }.filter {
+                    .filter { it.isValidCell() }.filter {
                         it.getValue().code <= last.getValue().code + 1
                     }
-                    .map { this.addCell(it) }.filter { !it.containCycles() }
+                    .map { this.addCell(it) }
             }
 
         }
