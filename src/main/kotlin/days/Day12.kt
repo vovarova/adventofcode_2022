@@ -88,44 +88,30 @@ class Day12() : Day(12) {
         }
     }
 
-    override fun partOne(): Any {
-        val heightMap = HeightMap(inputList)
+
+    fun breadthForSearch(startPath: List<HeightMap.Path>): HeightMap.Path {
         val fifoQueue = LinkedList<HeightMap.Path>()
-        fifoQueue.add(heightMap.startPath())
-        val visitedCels: MutableSet<Pair<Int, Int>> = mutableSetOf()
+        fifoQueue.addAll(startPath)
+        val visitedCells: MutableSet<Pair<Int, Int>> = mutableSetOf()
         while (fifoQueue.isNotEmpty()) {
             val poll = fifoQueue.poll()
             val possiblePath = poll.possiblePath()
-                .filter { !visitedCels.contains(it.head().toPair()) }.also {
-                    it.forEach { visitedCels.add(it.head().toPair()) }
-                }
+                .filter { visitedCells.add(it.head().toPair()) }
             fifoQueue.addAll(possiblePath)
             val finished = possiblePath.find { it.isFinished() }
             if (finished != null) {
-                return finished.cells.size - 1
+                return finished
             }
         }
-        return 0
+        return startPath.last()
+    }
+
+    override fun partOne(): Any {
+        return breadthForSearch(listOf(HeightMap(inputList).startPath())).cells.size-1
     }
 
     override fun partTwo(): Any {
-        val heightMap = HeightMap(inputList)
-        val fifoQueue = LinkedList<HeightMap.Path>()
-        fifoQueue.addAll(heightMap.startPathWithAllA())
-        val visitedCels: MutableSet<Pair<Int, Int>> = mutableSetOf()
-        while (fifoQueue.isNotEmpty()) {
-            val poll = fifoQueue.poll()
-            val possiblePath = poll.possiblePath()
-                .filter { !visitedCels.contains(it.head().toPair()) }.also {
-                    it.forEach { visitedCels.add(it.head().toPair()) }
-                }
-            fifoQueue.addAll(possiblePath)
-            val finished = possiblePath.find { it.isFinished() }
-            if (finished != null) {
-                return finished.cells.size - 1
-            }
-        }
-        return 0
+        return breadthForSearch(HeightMap(inputList).startPathWithAllA()).cells.size-1
     }
 
 }
