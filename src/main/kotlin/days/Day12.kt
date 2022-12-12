@@ -69,6 +69,7 @@ class Day12() : Day(12) {
                 val size = cells.map { it.toPair() }.distinct().size
                 return cells.size != size
             }
+            fun head():Cell = cells.last()
 
             fun addCell(cell: Cell): Path = Path(cells + cell)
 
@@ -87,14 +88,6 @@ class Day12() : Day(12) {
         }
     }
 
-    /*
-        Sabqponm
-        abcryxxl
-        accszExk
-        acctuvwj
-        abdefghi
-
-     */
     override fun partOne(): Any {
         val heightMap = HeightMap(inputList)
         val fifoQueue = LinkedList<HeightMap.Path>()
@@ -103,8 +96,8 @@ class Day12() : Day(12) {
         while (fifoQueue.isNotEmpty()) {
             val poll = fifoQueue.poll()
             val possiblePath = poll.possiblePath()
-                .filter { !visitedCels.contains(it.cells.last().toPair()) }.also {
-                    it.forEach { visitedCels.add(it.cells.last().toPair()) }
+                .filter { !visitedCels.contains(it.head().toPair()) }.also {
+                    it.forEach { visitedCels.add(it.head().toPair()) }
                 }
             fifoQueue.addAll(possiblePath)
             val finished = possiblePath.find { it.isFinished() }
@@ -123,8 +116,8 @@ class Day12() : Day(12) {
         while (fifoQueue.isNotEmpty()) {
             val poll = fifoQueue.poll()
             val possiblePath = poll.possiblePath()
-                .filter { !visitedCels.contains(it.cells.last().toPair()) }.also {
-                    it.forEach { visitedCels.add(it.cells.last().toPair()) }
+                .filter { !visitedCels.contains(it.head().toPair()) }.also {
+                    it.forEach { visitedCels.add(it.head().toPair()) }
                 }
             fifoQueue.addAll(possiblePath)
             val finished = possiblePath.find { it.isFinished() }
