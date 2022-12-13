@@ -5,33 +5,23 @@ import java.util.*
 
 class Day13() : Day(13) {
 
-    data class SingleElement(val value: Int) : Element {
-        override fun toCollection(): ElementCollection = ElementCollection(mutableListOf(this))
-        override fun toString(): String {
-            return value.toString()
-        }
-    }
-
-    data class ElementCollection(val elements: MutableList<Element> = mutableListOf()) : Element {
-        override fun toCollection(): ElementCollection = this
-        fun addSingleValues(vararg vals: Int) {
-            vals.forEach { elements.add(SingleElement(it)) }
-        }
-
-        companion object {
-            fun from(vararg vals: Int): ElementCollection {
-                return ElementCollection().apply { addSingleValues(*vals) }
-            }
-        }
-
-        override fun toString(): String {
-            return "[" + elements.map { it.toString() }.joinToString(separator = ",") + "]"
-        }
-    }
-
     sealed interface Element {
         fun toCollection(): ElementCollection
 
+        data class SingleElement(val value: Int) : Element {
+            override fun toCollection(): ElementCollection = ElementCollection(mutableListOf(this))
+            override fun toString(): String {
+                return value.toString()
+            }
+        }
+
+        data class ElementCollection(val elements: MutableList<Element> = mutableListOf()) : Element {
+            override fun toCollection(): ElementCollection = this
+
+            override fun toString(): String {
+                return "[" + elements.map { it.toString() }.joinToString(separator = ",") + "]"
+            }
+        }
     }
 
 
@@ -41,7 +31,9 @@ class Day13() : Day(13) {
             return comparison(left.toCollection(), right.toCollection()) != ComparisonResult.INVALID_ORDER
         }
 
-        fun revert(): ElementPair = ElementPair(right, left)
+        fun inRightOrderNonRecursive(): Boolean {
+            return comparisonNonRecursive(left.toCollection(), right.toCollection())
+        }
 
         enum class ComparisonResult {
             RIGHT_ORDER,
@@ -50,11 +42,49 @@ class Day13() : Day(13) {
 
         }
 
-        fun comparison(left: ElementCollection, right: ElementCollection): ComparisonResult {
+
+        fun comparisonNonRecursive(
+            left: Element.ElementCollection,
+            right: Element.ElementCollection
+        ): Boolean {
+            val execStack = LinkedList<Pair<Iterator<Element>, Iterator<Element>>>()
+            execStack.add(Pair(left.elements.iterator(), right.elements.iterator()))
+
+            while (execStack.isNotEmpty()) {
+                val peek = execStack.peekLast()
+                when (peek.first.hasNext() to peek.second.hasNext()) {
+                    true to false -> return false
+                    false to true -> return true
+                    false to false -> {
+                        execStack.pollLast()
+                        continue
+                    }
+                }
+                val leftElement = peek.first.next()
+                val rightElement = peek.second.next()
+                if ((leftElement is Element.SingleElement) && (rightElement is Element.SingleElement)) {
+                    if (leftElement.value > rightElement.value) {
+                        return false
+                    } else if (leftElement.value < rightElement.value) {
+                        return true
+                    }
+                } else {
+                    execStack.addLast(
+                        Pair(
+                            leftElement.toCollection().elements.iterator(),
+                            rightElement.toCollection().elements.iterator()
+                        )
+                    )
+                }
+            }
+            return true
+        }
+
+        fun comparison(left: Element.ElementCollection, right: Element.ElementCollection): ComparisonResult {
             for (i in 0 until Math.min(left.elements.size, right.elements.size)) {
                 val leftElement = left.elements[i]
                 val rightElement = right.elements[i]
-                if ((leftElement is SingleElement) && (rightElement is SingleElement)) {
+                if ((leftElement is Element.SingleElement) && (rightElement is Element.SingleElement)) {
                     if (leftElement.value > rightElement.value) {
                         return ComparisonResult.INVALID_ORDER
                     } else if (leftElement.value < rightElement.value) {
@@ -92,9 +122,9 @@ class Day13() : Day(13) {
         }
 
         companion object {
-            fun parseElementCollection(value: String): ElementCollection {
-                val rootCollection = ElementCollection()
-                val elementsStack = LinkedList<ElementCollection>()
+            fun parseElementCollection(value: String): Element.ElementCollection {
+                val rootCollection = Element.ElementCollection()
+                val elementsStack = LinkedList<Element.ElementCollection>()
                     .also { it.add(rootCollection) }
 
                 val tokenSplit = value
@@ -103,11 +133,11 @@ class Day13() : Day(13) {
 
                 for (i in 1 until tokenSplit.size) {
                     when (tokenSplit[i]) {
-                        "[" -> ElementCollection().also { elementsStack.peekLast().elements.add(it) }
+                        "[" -> Element.ElementCollection().also { elementsStack.peekLast().elements.add(it) }
                             .also { elementsStack.add(it) }
 
                         "]" -> elementsStack.pollLast()
-                        else -> elementsStack.peekLast().elements.add(SingleElement(tokenSplit[i].toInt()))
+                        else -> elementsStack.peekLast().elements.add(Element.SingleElement(tokenSplit[i].toInt()))
                     }
                 }
                 return rootCollection
@@ -126,9 +156,9 @@ class Day13() : Day(13) {
 
     override fun partTwo(): Any {
         val addedEl6 =
-            Day13.ElementCollection(mutableListOf(Day13.ElementCollection(mutableListOf(Day13.SingleElement(6)))))
+            Element.ElementCollection(mutableListOf(Element.ElementCollection(mutableListOf(Element.SingleElement(6)))))
         val addedEl2 =
-            Day13.ElementCollection(mutableListOf(Day13.ElementCollection(mutableListOf(Day13.SingleElement(2)))))
+            Element.ElementCollection(mutableListOf(Element.ElementCollection(mutableListOf(Element.SingleElement(2)))))
 
         val elementsPairCollection = ElementsPairCollection(inputList)
 
