@@ -35,11 +35,13 @@ class Day13() : Day(13) {
     }
 
 
-    data class ElementPair(val left: Element, val righ: Element) {
+    data class ElementPair(val left: Element, val right: Element) {
 
         fun inRightOrder(): Boolean {
-            return comparison(left.toCollection(), righ.toCollection()) != ComparisonResult.INVALID_ORDER
+            return comparison(left.toCollection(), right.toCollection()) != ComparisonResult.INVALID_ORDER
         }
+
+        fun revert(): ElementPair = ElementPair(right, left)
 
         enum class ComparisonResult {
             RIGHT_ORDER,
@@ -123,12 +125,28 @@ class Day13() : Day(13) {
     }
 
     override fun partTwo(): Any {
-        return ""
+        val addedEl6 =
+            Day13.ElementCollection(mutableListOf(Day13.ElementCollection(mutableListOf(Day13.SingleElement(6)))))
+        val addedEl2 =
+            Day13.ElementCollection(mutableListOf(Day13.ElementCollection(mutableListOf(Day13.SingleElement(2)))))
+
+        val elementsPairCollection = ElementsPairCollection(inputList)
+
+        val sortedElements = elementsPairCollection.pairs.flatMap { listOf(it.left, it.right) }.toMutableList().apply {
+            add(addedEl6)
+            add(addedEl2)
+        }.also {
+            it.sortWith { el1, el2 ->
+                ElementPair(el1, el2).inRightOrder().let {
+                    if (it) {
+                        -1
+                    } else {
+                        1
+                    }
+                }
+            }
+        }
+        return (sortedElements.indexOf(addedEl6) + 1) * (sortedElements.indexOf(addedEl2) + 1)
     }
 
-}
-
-
-fun main() {
-    println(Day13().partOne())
 }
