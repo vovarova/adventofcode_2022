@@ -88,7 +88,6 @@ class Day12() : Day(12) {
         }
     }
 
-
     fun breadthForSearch(startPath: List<HeightMap.Path>): HeightMap.Path {
         val fifoQueue = LinkedList<HeightMap.Path>()
         fifoQueue.addAll(startPath)
@@ -106,12 +105,36 @@ class Day12() : Day(12) {
         return startPath.last()
     }
 
+    fun deepForSearch(startPath: List<HeightMap.Path>, lastCell: HeightMap.Cell): Int {
+        val lifoQueue = LinkedList<HeightMap.Path>()
+        lifoQueue.addAll(startPath)
+        val visitedCells: MutableMap<Pair<Int, Int>, Int> = mutableMapOf()
+        while (lifoQueue.isNotEmpty()) {
+            val poll = lifoQueue.pollLast()
+            val possiblePath = poll.possiblePath()
+                .filter {
+                    visitedCells.getOrDefault(it.head().toPair(), Int.MAX_VALUE) > it.cells.size
+                }
+                .also {
+                    it.forEach { visitedCells.put(it.head().toPair(), it.cells.size) }
+                }.filter { !lastCell.equalsCell(it.head()) }
+            lifoQueue.addAll(possiblePath)
+        }
+        return visitedCells[lastCell.toPair()]!! - 1
+    }
+
+
     override fun partOne(): Any {
-        return breadthForSearch(listOf(HeightMap(inputList).startPath())).cells.size-1
+        return breadthForSearch(listOf(HeightMap(inputList).startPath())).cells.size - 1
     }
 
     override fun partTwo(): Any {
-        return breadthForSearch(HeightMap(inputList).startPathWithAllA()).cells.size-1
+        return breadthForSearch(HeightMap(inputList).startPathWithAllA()).cells.size - 1
+    }
+
+    fun partTwoDeepForSarch(): Any {
+        val heightMap = HeightMap(inputList)
+        return deepForSearch(heightMap.startPathWithAllA(), heightMap.end)
     }
 
 }
