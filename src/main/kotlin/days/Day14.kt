@@ -62,7 +62,7 @@ class Day14 : Day(14) {
                 } else
                     currentPosition = first
             }
-            return currentPosition != init
+            return false
         }
     }
 
