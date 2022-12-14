@@ -6,9 +6,6 @@ import util.range
 
 class Day14 : Day(14) {
 
-    /*    498,4 -> 498,6 -> 496,6
-        503,4 -> 502,4 -> 502,9 -> 494,9*/
-
     class CaveMap(input: List<String>) {
         val rock: Set<Cell>
         var maxRow: Int
