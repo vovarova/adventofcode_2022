@@ -1,6 +1,7 @@
 package days
 
 import util.Cell
+import util.range
 
 
 class Day14 : Day(14) {
@@ -8,7 +9,7 @@ class Day14 : Day(14) {
     /*    498,4 -> 498,6 -> 496,6
         503,4 -> 502,4 -> 502,9 -> 494,9*/
 
-    class RockMap(input: List<String>) {
+    class CaveMap(input: List<String>) {
         val rock: Set<Cell>
         var maxRow: Int
         val sand: MutableSet<Cell> = mutableSetOf()
@@ -19,40 +20,14 @@ class Day14 : Day(14) {
         }
 
         fun createRockIndex(input: List<String>): Set<Cell> {
-            val rockIndex: MutableSet<Cell> = mutableSetOf()
-
-            for (line in input) {
-                val split = line.split(" -> ")
-                    .map { it.split(",").let { Pair(it[1].toInt(), it[0].toInt()) } }
-                for (i in 1 until split.size) {
-                    val start = split[i - 1]
-                    val end = split[i]
-                    // same row
-                    var rowRange: IntProgression
-                    var columnRange: IntProgression
-                    if (start.first == end.first) {
-                        columnRange = IntProgression.fromClosedRange(
-                            start.second,
-                            end.second,
-                            Integer.signum(end.second - start.second)
-                        )
-                        rowRange = IntRange(start.first, start.first)
-                    } else {
-                        rowRange = IntProgression.fromClosedRange(
-                            start.first,
-                            end.first,
-                            Integer.signum(end.first - start.first)
-                        )
-                        columnRange = IntRange(start.second, start.second)
+            return input.flatMap { line ->
+                line.split(" -> ").map { it.split(",").let { Cell(row = it[1].toInt(), column = it[0].toInt()) } }
+                    .windowed(2) { Pair(it[0], it[1]) }.flatMap { it ->
+                        val columnRange = range(it.first.column, it.second.column)
+                        val rowRange = range(it.first.row, it.second.row)
+                        rowRange.flatMap { row -> columnRange.map { column -> Cell(row, column) } }
                     }
-                    for (row in rowRange) {
-                        for (column in columnRange) {
-                            rockIndex.add(Cell(row, column))
-                        }
-                    }
-                }
-            }
-            return rockIndex
+            }.toSet()
         }
 
         fun fallSand(init: Cell): Boolean {
@@ -96,17 +71,17 @@ class Day14 : Day(14) {
 
 
     override fun partOne(): Int {
-        val rockMap = RockMap(inputList)
-        while (rockMap.fallSand(Cell(0, 500))) {
+        val caveMap = CaveMap(inputList)
+        while (caveMap.fallSand(Cell(0, 500))) {
         }
-        return rockMap.sand.size
+        return caveMap.sand.size
     }
 
     override fun partTwo(): Any {
 
-        val rockMap = RockMap(inputList)
-        while (rockMap.fallSandWithInfiniteFloor(Cell(0, 500))) {
+        val caveMap = CaveMap(inputList)
+        while (caveMap.fallSandWithInfiniteFloor(Cell(0, 500))) {
         }
-        return rockMap.sand.size
+        return caveMap.sand.size
     }
 }
