@@ -1,23 +1,26 @@
 package days
 
+import util.Cell
+
 
 class Day14 : Day(14) {
 
     /*    498,4 -> 498,6 -> 496,6
         503,4 -> 502,4 -> 502,9 -> 494,9*/
 
-    class RockMap(input: List<String>, increaseMax: Int = 0) {
+    class RockMap(input: List<String>) {
         val rock: Set<Cell>
         var maxRow: Int
         val sand: MutableSet<Cell> = mutableSetOf()
 
         init {
             rock = createRockIndex(input)
-            maxRow = rock.map { it.row }.max() + increaseMax
+            maxRow = rock.map { it.row }.max()
         }
 
         fun createRockIndex(input: List<String>): Set<Cell> {
             val rockIndex: MutableSet<Cell> = mutableSetOf()
+
             for (line in input) {
                 val split = line.split(" -> ")
                     .map { it.split(",").let { Pair(it[1].toInt(), it[0].toInt()) } }
@@ -52,37 +55,6 @@ class Day14 : Day(14) {
             return rockIndex
         }
 
-
-        fun cell(row: Int, column: Int): Cell = Cell(row, column)
-
-        inner class Cell(val row: Int, val column: Int) {
-            val pair = Pair(row, column)
-            fun up(): Cell = Cell(row + 1, column)
-            fun down(): Cell = Cell(row - 1, column)
-            fun left(): Cell = Cell(row, column - 1)
-            fun right(): Cell = Cell(row, column + 1)
-            fun toPair() = pair
-
-            fun isValid(): Boolean {
-                return !(rock.contains(this) || sand.contains(this))
-            }
-
-            fun isValidWithInfiniteFloor(): Boolean {
-                return !(rock.contains(this) || sand.contains(this) || row == maxRow)
-            }
-
-            override fun equals(other: Any?): Boolean {
-                if (other is Cell) {
-                    return this.pair.equals(other.pair)
-                }
-                return false
-            }
-
-            override fun hashCode(): Int {
-                return pair.hashCode()
-            }
-        }
-
         fun fallSand(init: Cell): Boolean {
             var currentPosition = init
             while (currentPosition.row < maxRow) {
@@ -90,7 +62,7 @@ class Day14 : Day(14) {
                     currentPosition.up(),
                     currentPosition.up().left(),
                     currentPosition.up().right()
-                ).find { it.isValid() }
+                ).find { !(rock.contains(it) || sand.contains(it)) }
                 if (first == null) {
                     sand.add(currentPosition)
                     return true
@@ -105,12 +77,13 @@ class Day14 : Day(14) {
                 return false
             }
             var currentPosition = init
-            while (currentPosition.row < maxRow) {
+            val floorRow = maxRow + 2
+            while (currentPosition.row < floorRow) {
                 val first = listOf(
                     currentPosition.up(),
                     currentPosition.up().left(),
                     currentPosition.up().right()
-                ).find { it.isValidWithInfiniteFloor() }
+                ).find { !(rock.contains(it) || sand.contains(it) || it.row == floorRow) }
                 if (first == null) {
                     sand.add(currentPosition)
                     return true
@@ -124,14 +97,15 @@ class Day14 : Day(14) {
 
     override fun partOne(): Int {
         val rockMap = RockMap(inputList)
-        while (rockMap.fallSand(rockMap.cell(0, 500))) {
+        while (rockMap.fallSand(Cell(0, 500))) {
         }
         return rockMap.sand.size
     }
 
     override fun partTwo(): Any {
-        val rockMap = RockMap(inputList, 2)
-        while (rockMap.fallSandWithInfiniteFloor(rockMap.cell(0, 500))) {
+
+        val rockMap = RockMap(inputList)
+        while (rockMap.fallSandWithInfiniteFloor(Cell(0, 500))) {
         }
         return rockMap.sand.size
     }
