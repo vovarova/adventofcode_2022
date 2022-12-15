@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import util.Cell
 
-class Day15Test {
+class DayTest {
 
     @Test
     fun part1() {
@@ -17,8 +17,4 @@ class Day15Test {
         Assertions.assertEquals(56000011.toLong(), day15.partTwo(20))
     }
 
-    @Test
-    fun manhatanDistance() {
-        Assertions.assertEquals(9, Util.manhattanDistance(Cell(7, 8), Cell(10, 2)))
-    }
 }

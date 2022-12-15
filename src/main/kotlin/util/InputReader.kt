@@ -1,6 +1,6 @@
 package util
 
-import java.io.File
+import java.io.InputStreamReader
 
 object InputReader {
 
@@ -12,7 +12,7 @@ object InputReader {
         return fromResources(day).readLines()
     }
 
-    private fun fromResources(day: Int): File {
-        return File(javaClass.classLoader.getResource("input_day_$day.txt").toURI())
+    private fun fromResources(day: Int): InputStreamReader {
+        return InputStreamReader(javaClass.classLoader.getResourceAsStream("input_day_$day.txt")!!)
     }
 }

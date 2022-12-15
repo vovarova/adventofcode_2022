@@ -8,20 +8,19 @@ import kotlin.math.abs
 class Day15 : Day(15) {
 
     class Sensor(val coordinates: Cell, val beacon: Cell) {
-        fun beaconDistance(): Int = manhattanDistance(coordinates, beacon)
+        val beaconDistance: Int = manhattanDistance(coordinates, beacon)
         fun distanceTo(cell: Cell): Int = manhattanDistance(coordinates, cell)
 
-
         fun covers(cell: Cell): Boolean {
-            return beaconDistance() >= distanceTo(cell)
+            return beaconDistance >= distanceTo(cell)
         }
 
         fun maxColumnCovered(row: Int): Cell {
-            return Cell(row, coordinates.column + abs(beaconDistance() - abs(row - coordinates.row)))
+            return Cell(row, coordinates.column + abs(beaconDistance - abs(row - coordinates.row)))
         }
 
         fun minColumnCovered(row: Int): Cell {
-            return Cell(row, coordinates.column - abs(beaconDistance() - abs(row - coordinates.row)))
+            return Cell(row, coordinates.column - abs(beaconDistance - abs(row - coordinates.row)))
         }
     }
 
@@ -48,16 +47,8 @@ class Day15 : Day(15) {
             beacons = sensorMap.values.map { it.beacon }.toSet()
         }
 
-        fun closestSensor(cell: Cell): Sensor? {
-            val sortedByDescending =
-                sensorMap.values.asSequence().filter { it.covers(cell) }
-                    .map { (it.distanceTo(cell) - it.beaconDistance()) to it }
-                    .sortedByDescending { it.first }.map { it.second }.take(1).toList()
-            return if (sortedByDescending.isEmpty()) {
-                return null
-            } else {
-                return sortedByDescending.first()
-            }
+        fun coveredBySensor(cell: Cell): Sensor? {
+            return sensorMap.values.asSequence().find { it.covers(cell) }
         }
 
 
@@ -70,9 +61,9 @@ class Day15 : Day(15) {
         var currentCell = Cell(row, minColumn)
         var count: Int = 0
         while (currentCell.column <= maxColumn) {
-            val closestSensor = sensors.closestSensor(currentCell)
-            if (closestSensor != null) {
-                val maxColumnCovered = closestSensor.maxColumnCovered(currentCell.row)
+            val coveredBySensor = sensors.coveredBySensor(currentCell)
+            if (coveredBySensor != null) {
+                val maxColumnCovered = coveredBySensor.maxColumnCovered(currentCell.row)
                 count += maxColumnCovered.column - currentCell.column + 1
                 count -= sensors.sensorsOnRow(currentCell.row, currentCell.column, maxColumnCovered.column).size
                 count -= sensors.beaconsOnRow(currentCell.row, currentCell.column, maxColumnCovered.column).size
@@ -92,9 +83,9 @@ class Day15 : Day(15) {
         for (row in 0..maxCoordinate) {
             var currentCell = Cell(row, 0)
             while (currentCell.column <= maxCoordinate) {
-                val closestSensor = sensors.closestSensor(currentCell)
-                if (closestSensor != null) {
-                    currentCell = closestSensor.maxColumnCovered(currentCell.row).right()
+                val coveredBySensor = sensors.coveredBySensor(currentCell)
+                if (coveredBySensor != null) {
+                    currentCell = coveredBySensor.maxColumnCovered(currentCell.row).right()
                 } else {
                     return currentCell
                 }
@@ -120,3 +111,8 @@ object Util {
     fun manhattanDistance(c1: Cell, c2: Cell): Int =
         abs(c1.row - c2.row) + abs(c1.column - c2.column)
 }
+
+fun main() {
+    Day15().partTwo()
+}
+
