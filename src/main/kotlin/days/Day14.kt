@@ -31,9 +31,9 @@ class Day14 : Day(14) {
             var currentPosition = init
             while (currentPosition.row < maxRow) {
                 val first = listOf(
-                    currentPosition.up(),
-                    currentPosition.up().left(),
-                    currentPosition.up().right()
+                    currentPosition.down(),
+                    currentPosition.down().left(),
+                    currentPosition.down().right()
                 ).find { !(rock.contains(it) || sand.contains(it)) }
                 if (first == null) {
                     sand.add(currentPosition)
@@ -52,9 +52,9 @@ class Day14 : Day(14) {
             val floorRow = maxRow + 2
             while (currentPosition.row < floorRow) {
                 val first = listOf(
-                    currentPosition.up(),
-                    currentPosition.up().left(),
-                    currentPosition.up().right()
+                    currentPosition.down(),
+                    currentPosition.down().left(),
+                    currentPosition.down().right()
                 ).find { !(rock.contains(it) || sand.contains(it) || it.row == floorRow) }
                 if (first == null) {
                     sand.add(currentPosition)
