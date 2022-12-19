@@ -49,6 +49,22 @@ class Day17 : Day(17) {
             return input[moveIteration]
         }
 
+
+        fun hasCycle(): Boolean {
+            val minSize:Int = 1000
+            if(highestRow>=200){
+                if ((highestRow-minSize+1) % 2 == 0) {
+                    val halfSize = minSize+(highestRow-minSize+1) / 2
+                    return IntRange(minSize, halfSize-1).asSequence().flatMap { row ->
+                        IntRange(1, 1).map { column ->
+                            Pair(Cell(row, column), Cell(row + halfSize, column))
+                        }
+                    }.all { cells.contains(it.first) == cells.contains(it.second) }
+                }
+            }
+            return false
+        }
+
         fun nextElement(): Element {
             elementIteration++
             if (elementIteration == elementQueue.size) {
@@ -199,7 +215,6 @@ class Day17 : Day(17) {
     override fun partTwo(): Any {
         val elementsBoard = ElementsBoard(inputString)
         for (i in 1..1000000000000) {
-
             var nextElement = elementsBoard.nextElement()
             do {
 
@@ -224,11 +239,22 @@ class Day17 : Day(17) {
             elementsBoard.addElementToRest(nextElement)
             /*println(elementsBoard.boardToString())
         println("********************************")*/
+            if(i%500000 == 0L){
+                println("Iteration ${i} size = ${elementsBoard.highestRow}")
 
+            }
+/*            if (elementsBoard.hasCycle()) {
+                println("Cycle from 0 to ${elementsBoard.highestRow/2}")
+            }*/
         }
 
         return elementsBoard.highestRow
     }
+}
+
+fun main() {
+    val partTwo = Day17().partTwo()
+
 }
 
 
