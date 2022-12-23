@@ -95,7 +95,6 @@ class Day19 : Day(19) {
         )
 
         val assets = asset()
-
         fun shouldBuild(robot: RobotV2): Boolean {
             if (robot.name == RobotV2.Name.oreRobot) {
                 if (blueprint.maxOreNeededToBuild <= aggBuy.countRobots().oreRobot) {
@@ -229,10 +228,4 @@ class Day19 : Day(19) {
         }.map { it.assets.openGeode }.reduce { a, b -> a * b }
     }
 }
-
-fun main() {
-    val day19 = Day19()
-    println(day19.partTwo())
-}
-
 
