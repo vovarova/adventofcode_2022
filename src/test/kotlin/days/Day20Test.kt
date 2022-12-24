@@ -9,5 +9,11 @@ class Day20Test {
         val day = Day20()
         Assertions.assertEquals(3, day.partOne())
     }
+
+    @Test
+    fun part2() {
+        val day = Day20()
+        Assertions.assertEquals(1623178306L, day.partTwo())
+    }
     
 }

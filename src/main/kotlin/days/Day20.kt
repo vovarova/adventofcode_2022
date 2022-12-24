@@ -3,8 +3,7 @@ package days
 
 class Day20 : Day(20) {
 
-    class Moves(input: List<String>) {
-        val moves: List<Int> = input.map { it.toInt() }
+    class Moves(val moves: List<Long>) {
         val zeroIndex = moves.indexOf(0)
 
         fun toCustomLinkedList(): CustomLinkedList {
@@ -18,12 +17,13 @@ class Day20 : Day(20) {
     }
 
 
-    class CustomLinkedList(index: Int, val value: Int) {
+    class CustomLinkedList(index: Int, val value: Long) {
         val head: Node = Node(index, value)
         val indexNodes: MutableMap<Int, CustomLinkedList.Node> = mutableMapOf(head.index to head)
         var size: Int = 1
         var last: Node = head
-        fun add(index: Int, value: Int) {
+
+        fun add(index: Int, value: Long) {
             size++
             val node = Node(index, value, prev = last)
             last.next = node
@@ -36,7 +36,7 @@ class Day20 : Day(20) {
             last.next = head
         }
 
-        inner class Node(val index: Int, val value: Int, var next: Node? = null, var prev: Node? = null)
+        inner class Node(val index: Int, val value: Long, var next: Node? = null, var prev: Node? = null)
 
         fun find(node: Node, moves: Int): Node {
             val normalizedNode = moves % size
@@ -53,14 +53,14 @@ class Day20 : Day(20) {
             return currentNode
         }
 
-        fun findMoves(node: Node, moves: Int): Node {
+        fun findMoves(node: Node, moves: Long): Node {
             val normalizedNode = moves % (size - 1)
             val positiveNormalized = if (normalizedNode < 0) {
                 size - 1 + normalizedNode
             } else {
                 normalizedNode
             }
-            if (positiveNormalized == 0) {
+            if (positiveNormalized == 0L) {
                 return node
             }
             var currentNode = node.next!!
@@ -69,8 +69,8 @@ class Day20 : Day(20) {
         }
 
 
-        fun values(nextNode: (Node) -> Node): MutableList<Int> {
-            val result = mutableListOf<Int>()
+        fun values(nextNode: (Node) -> Node): MutableList<Long> {
+            val result = mutableListOf<Long>()
             var currentNode = indexNodes[0]!!
             for (i in 1..size) {
                 result.add(currentNode.value)
@@ -102,12 +102,10 @@ class Day20 : Day(20) {
 
 
     override fun partOne(): Any {
-        val moves = Moves(inputList)
+        val moves = Moves(inputList.map { it.toLong() })
         val customLinkedList = moves.toCustomLinkedList()
-        /*println(customLinkedList)*/
         for (i in 0 until customLinkedList.size) {
             customLinkedList.move(i)
-            /*println(customLinkedList)*/
         }
         val node = customLinkedList.indexNodes[moves.zeroIndex]!!
         val `1000` = customLinkedList.find(node, 1000).value
@@ -118,12 +116,18 @@ class Day20 : Day(20) {
     }
 
     override fun partTwo(): Any {
-        return ""
+        val moves = Moves(inputList.map { it.toLong() }.map { it * 811589153 })
+        val customLinkedList = moves.toCustomLinkedList()
+        for (iter in 1..10) {
+            for (i in 0 until customLinkedList.size) {
+                customLinkedList.move(i)
+            }
+        }
+        val node = customLinkedList.indexNodes[moves.zeroIndex]!!
+        val `1000` = customLinkedList.find(node, 1000).value
+        val `2000` = customLinkedList.find(node, 2000).value
+        val `3000` = customLinkedList.find(node, 3000).value
+        println("1000:${`1000`},2000:${`2000`},3000:${`3000`}")
+        return `1000` + `2000` + `3000`
     }
 }
-
-fun main() {
-    println(Day20().partOne())
-}
-
-
